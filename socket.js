@@ -1,10 +1,11 @@
-var uniqid = require("uniqid");
+const uniqid = require("uniqid");
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require("./users");
 
 const socketConfig = (io) => {
 
   io.on("connection", (socket) => {
+    console.log("new connection")
     socket.on("join", ({ name }, callback) => {
       let user;
       const arr = Array.from(io.sockets.adapter.rooms);
@@ -32,7 +33,7 @@ const socketConfig = (io) => {
     })
 
     socket.on("disconnect", () => {
-      const user = removeUser(socket.id);
+      const user = getUser(socket.id)
       if (user) {
         socket.broadcast.to(user.room).emit(
           "message", { user: "System", text: `${user.name} has left!` }
@@ -42,6 +43,7 @@ const socketConfig = (io) => {
           "message", { user: "System", text: "Closing room in 5 seconds" }
         );
         setTimeout(() => {
+          removeUser(user.room);
           socket.broadcast.to(user.room).emit("endRoom")
         },5000);
       }

@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 const routes = require("./routes");
 
 // Middleware
@@ -18,6 +18,7 @@ const server = app.listen(PORT, () => {
 const io = require("socket.io")(server, {
   cors: {
     origin: "*",
-  }
+  },
+  wsEngine: require("eiows").Server
 });
 require("./socket")(io);

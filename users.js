@@ -7,10 +7,10 @@ const addUser = ({ id, name, room }) => {
   return user
 }
 
-const removeUser = (id) => {
-  const index = users.findIndex((user) => user.id === id);
-
-  if(index !== -1) return users.splice(index, 1)[0];
+const removeUser = (room) => {
+  console.log(users)
+  users = users.filter(user => user.room !== room);
+  console.log(users)
 }
 
 const getUser = (id) => users.find((user) => user.id === id);
