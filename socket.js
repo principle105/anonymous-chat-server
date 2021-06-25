@@ -1,8 +1,26 @@
 const uniqid = require("uniqid");
 
-const { addUser, removeUser, getUser, getUsersInRoom } = require("./users");
+const { addUser, removeUsersInRoom, removeUser, getUser, getUsersInRoom } = require("./users");
 
 const socketConfig = (io) => {
+
+  const handleLeave = (socket) => {
+    const user = removeUser(socket.id)
+    if (user) {
+      socket.broadcast.to(user.room).emit(
+        "message", { user: "System", text: `${user.name} has left!` }
+      );
+      io.in(user.room).emit("roomData", getUsersInRoom(user.room));
+      socket.broadcast.to(user.room).emit(
+        "message", { user: "System", text: "Closing room in 5 seconds" }
+      );
+      removeUsersInRoom(user.room);
+      io.in(user.room).emit("endRoom")
+      setTimeout(() => {
+        io.in(user.room).emit("joinNew")
+      },5000);
+    }
+  }
 
   io.on("connection", (socket) => {
     console.log("new connection")
@@ -32,27 +50,20 @@ const socketConfig = (io) => {
       io.in(user.room).emit("roomData", getUsersInRoom(user.room));
     })
 
-    socket.on("disconnect", () => {
-      const user = getUser(socket.id)
-      if (user) {
-        socket.broadcast.to(user.room).emit(
-          "message", { user: "System", text: `${user.name} has left!` }
-        );
-        io.in(user.room).emit("roomData", getUsersInRoom(user.room));
-        socket.broadcast.to(user.room).emit(
-          "message", { user: "System", text: "Closing room in 5 seconds" }
-        );
-        setTimeout(() => {
-          removeUser(user.room);
-          socket.broadcast.to(user.room).emit("endRoom")
-        },5000);
-      }
+    socket.on("leaveRoom", () => {
+      handleLeave(socket);
     }) 
+
+    socket.on("disconnect", () => {
+      handleLeave(socket);
+    })
 
     socket.on("sendMessage", (text,callback) => {
       const user = getUser(socket.id)
-      io.to(user.room).emit("message", { user: user.name, text })
-      callback()
+      if (user) {
+        io.to(user.room).emit("message", { user: user.name, text })
+        callback()
+      }
     })
     
   })
