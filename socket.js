@@ -65,7 +65,7 @@ const socketConfig = (io) => {
     socket.on("sendMessage", ({text, file},callback) => {
       const user = getUser(socket.id)
       if (user) {
-        io.to(user.room).emit("message", {text, file, user: user.name})
+        io.to(user.room).emit("message", {text, file, user: user.name })
         callback()
       }
     })
