@@ -5,7 +5,7 @@ const { addUser, removeUsersInRoom, removeUser, getUser, getUsersInRoom } = requ
 const socketConfig = (io) => {
 
   const handleLeave = (socket) => {
-    const user = removeUser(socket.id)
+    const user = removeUser(socket.id);
     if (user) {
       socket.broadcast.to(user.room).emit(
         "message", { user: "System", text: `${user.name} has left!` }
@@ -14,9 +14,10 @@ const socketConfig = (io) => {
       socket.broadcast.to(user.room).emit(
         "message", { user: "System", text: "Closing room in 5 seconds" }
       );
-      removeUsersInRoom(user.room);
       io.in(user.room).emit("endRoom")
+
       setTimeout(() => {
+        removeUsersInRoom(user.room);
         io.in(user.room).emit("joinNew")
       },5000);
     }
