@@ -62,10 +62,10 @@ const socketConfig = (io) => {
     })
 
     // When user sends a message
-    socket.on("sendMessage", (text,callback) => {
+    socket.on("sendMessage", ({text, file},callback) => {
       const user = getUser(socket.id)
       if (user) {
-        io.to(user.room).emit("message", { user: user.name, text })
+        io.to(user.room).emit("message", {text, file, user: user.name})
         callback()
       }
     })
