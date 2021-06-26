@@ -23,7 +23,8 @@ const socketConfig = (io) => {
   }
 
   io.on("connection", (socket) => {
-    console.log("new connection")
+
+    // When user tries to join a room
     socket.on("join", ({ name }, callback) => {
       let user;
       const arr = Array.from(io.sockets.adapter.rooms);
@@ -50,19 +51,30 @@ const socketConfig = (io) => {
       io.in(user.room).emit("roomData", getUsersInRoom(user.room));
     })
 
+    // When user leaves a room
     socket.on("leaveRoom", () => {
       handleLeave(socket);
     }) 
 
+    // When user leaves the website
     socket.on("disconnect", () => {
       handleLeave(socket);
     })
 
+    // When user sends a message
     socket.on("sendMessage", (text,callback) => {
       const user = getUser(socket.id)
       if (user) {
         io.to(user.room).emit("message", { user: user.name, text })
         callback()
+      }
+    })
+
+    // Fetching typing information for each room
+    socket.on("typingData", ({ name, typing }) => {
+      const user = getUser(socket.id)
+      if (user) {
+        socket.to(user.room).emit("sendTypingData", { name, typing });
       }
     })
     
