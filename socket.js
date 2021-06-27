@@ -1,5 +1,3 @@
-const uniqid = require("uniqid");
-
 const { 
   addUser, 
   removeUsersInRoom, 
